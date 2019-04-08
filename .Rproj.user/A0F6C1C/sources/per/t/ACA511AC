@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1554647024698.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2600767874",
+    "id" : "ACA511AC",
+    "lastKnownWriteTime" : 1554663862,
+    "last_content_update" : 1554663862313,
+    "path" : "~/Documents/randomForests/slides.Rmd",
+    "project_path" : "slides.Rmd",
+    "properties" : {
+        "cursorPosition" : "57,0",
+        "docOutlineVisible" : "0",
+        "scrollLine" : "28",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
