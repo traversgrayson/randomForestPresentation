@@ -51,11 +51,31 @@ The process of creating a random forest is very similar to the process of baggin
 
 ### Example in R (Ames Housing)
 
-```{r}
+We will use a random forest to predict the sale price of a house is the Ames Housing dataset.
+
+```{r, warning=FALSE, message=FALSE}
 library(AmesHousing)
+library(dplyr)
+library(randomForest)
+
+set.seed(15)
 
 ames <- make_ames()
 
+ames <- ames %>% select(c("Sale_Type","Pool_QC","Year_Sold","Alley","Overall_Cond","Year_Built","Lot_Area","Street",
+                          "Central_Air","Lot_Frontage","MS_Zoning","House_Style","Bldg_Type","Neighborhood",
+                          "Overall_Qual","Utilities","Exter_Qual", "Sale_Price"))
+
+
+sample <- sample.int(n = nrow(ames), size = floor(.8*nrow(ames)), replace = F)
+train <- ames[sample, ]
+test  <- ames[-sample, ]
+
+amesRF <- randomForest(Sale_Price ~ ., data = train,mtry = 4)
+amesBag <- randomForest(Sale_Price ~ ., data = train,mtry= 18)
+amesLM <- lm(Sale_Price ~ ., data = train)
+
+plot(amesRF)
 ```
 
 
