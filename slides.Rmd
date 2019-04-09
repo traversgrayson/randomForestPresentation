@@ -11,6 +11,10 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(AmesHousing)
+library(dplyr)
+library(ggplot2)
+library(randomForest)
 ```
 
 # Random Forests vs. Bagging (Motivation)
@@ -28,7 +32,7 @@ The process of creating a random forest is very similar to the process of baggin
 ![](randomForest.jpg)
 
 ***
-# Construction of a Random Forest
+# Algorithm
 
 ### Parameters
 
@@ -37,7 +41,7 @@ The process of creating a random forest is very similar to the process of baggin
   3. (optional) Size of training set, the rows that we sample from without replacement
   4. (optional) Maximum size of the trees grown, by number of nodes *j*
 
-### Process
+### Construction
 
 > 1. Randomly select rows with replacement from data (typically use 2/3's of rows) 
 > 2. **Randomly select** ***m* variables to create split** (typically $m \equiv \sqrt{p}$)
@@ -51,32 +55,170 @@ The process of creating a random forest is very similar to the process of baggin
 
 ### Example in R (Ames Housing)
 
-We will use a random forest to predict the sale price of a house is the Ames Housing dataset.
-
-```{r, warning=FALSE, message=FALSE}
-library(AmesHousing)
-library(dplyr)
+We will use a random forest to predict the sale price of a house is the Ames Housing dataset. 
+```{r,eval=FALSE,echo = TRUE}
+# We will use the randomForest library
 library(randomForest)
+
+# Use a selection of variables
+rf <- randomForest(Sales_Price ~ Year_Sold + Alley 
+                   + Year_Built, data = ames)
+
+# Use all variables
+rf <- randomForest(Sales_Price ~ ., data = ames)
+```
+
+- We will use the randomForest library in R to construct our randomForests
+- Simply provide the constructor with a formula and the dataset to be used
+
+***
+
+# Variable Selection
+
+```{r pressure, echo=FALSE,fig.height= 10}
+knitr::include_graphics("crop_1.png")
+```
+
+***
+
+```{r, warning=FALSE, message=FALSE,echo = FALSE}
+
+library(readr)
+
+### ====================
+# Commented because running script is very 
+# computationally expensive
+### ====================
+
+# oob.err=double(18)
+# test.err=double(18)
+# 
+# # Try building a random forest for every value of mtry
+# for(mtry in 1:18)
+# {
+#   rf= randomForest(Sale_Price ~ ., data = train,mtry = mtry)
+#   oob.err[mtry] = rf$mse[400] #Error of all Trees fitted
+# 
+#   pred<-predict(rf,test) #Predictions on Test Set for each Tree
+#   test.err[mtry]= with(test, mean( (Sale_Price - pred)^2)) #Mean Squared Test Error
+# 
+#   cat(mtry," ") #printing the output to the console
+# 
+# }
+# errFrame = data.frame(numVars = 1:18,mseTest = test.err,mseOob = oob.err)
+# write.csv(errFrame,"error_by_split.csv")
+
+errFrame <- read_csv("error_by_split.csv") %>% select(-X1)
+
+errFrame <- reshape2::melt(errFrame,id = 'numVars')
+                           
+ggplot(aes(x = numVars,y = value,color = variable),data = errFrame) + geom_line() + labs(x = "Number of Variables Considered at Each Split",y= "Mean Squared Error", title = " MSE By Variables Considered", color = "Type of Error")
+```
+
+*** 
+# Creating the Random Forest
+
+```{r ,echo=FALSE,fig.height= 10}
+knitr::include_graphics("crop_2.png")
+```
+
+***
+```{r, load myData, warning=FALSE, message=FALSE}
+load("myData.RData")
 
 set.seed(15)
 
-ames <- make_ames()
+# # Reduce the number of columns from 81 to 18
+# ames <- make_ames()
+# # ames <- ames %>% select(c("Sale_Type","Pool_QC","Year_Sold","Alley","Overall_Cond","Year_Built","Lot_Area","Street",
+# #                          "Central_Air","Lot_Frontage","MS_Zoning","House_Style","Bldg_Type","Neighborhood",
+# #                          "Overall_Qual","Utilities","Exter_Qual", "Sale_Price"))
+# 
+# # Split the data into training and test set
+# sample <- sample.int(n = nrow(ames), size = floor(.8*nrow(ames)), replace = F)
+# train <- ames[sample, ]
+# test  <- ames[-sample, ]
+# 
+# # Build a random forest and Bagging
+# amesRF <- randomForest(Sale_Price ~ ., data = train,mtry = 26)
+# amesBag <- randomForest(Sale_Price ~ ., data = train,mtry= 81)
 
-ames <- ames %>% select(c("Sale_Type","Pool_QC","Year_Sold","Alley","Overall_Cond","Year_Built","Lot_Area","Street",
-                          "Central_Air","Lot_Frontage","MS_Zoning","House_Style","Bldg_Type","Neighborhood",
-                          "Overall_Qual","Utilities","Exter_Qual", "Sale_Price"))
+# Plot Mean-Squared Error of RF vs Bagging
+err = data.frame(tree = 1:500,'Random Forest' = amesRF$mse, 'Bagging' = amesBag$mse)
+gr = reshape2::melt(err,id = 'tree')
 
-
-sample <- sample.int(n = nrow(ames), size = floor(.8*nrow(ames)), replace = F)
-train <- ames[sample, ]
-test  <- ames[-sample, ]
-
-amesRF <- randomForest(Sale_Price ~ ., data = train,mtry = 4)
-amesBag <- randomForest(Sale_Price ~ ., data = train,mtry= 18)
-amesLM <- lm(Sale_Price ~ ., data = train)
-
-plot(amesRF)
+ggplot(data = gr,aes(tree,value,color = variable)) + geom_line() + labs(x = "Number of Trees",y = "Mean Squared Error"
+                                                                        , title = "Mean Squared Error by Number of Trees", 
+                                                                        color = "Method")
 ```
 
 
+***
 
+# Boosting
+
+Boosting differs from Random Forests in that instead of growing many *decorrelated* trees, we build trees sequentially using information from previous trees. 
+
+### Main Idea
+
+Fit the first tree using the actual outcomes. Then from there on out use residuals from previous tree to fit next tree. 
+
+# Algorithm
+
+### Parameters
+
+1. *B*, the number of trees to build. Unlike random forests there is a risk of overfitting the model if $B$ is too high. Use cross-validation to find optimal value of *B*.
+
+2. *$\lambda$*, the shrinkage factor (typically 0.01 or 0.0001). The shrinkage factor determines how much the residuals from the current decision tree change the overall model. 
+
+3. *d*, the number of splits in each tree. When *d* = 1, each tree is called a *stump*. 
+
+***
+
+### Construction
+
+Let $\hat{f}$ be our function with which we will make regression estimates. 
+
+> 1. Let $\hat{f}(x) = 0$ and $r_i = y_i$ for all $i$.
+
+> 2. For $b \in \{1,2,\dots,B\}$, repeat:
+    (a) Fit a tree *t_b* with *d* splits to the training data (X and r=y).
+    (b) Update $\hat{f}(x)$ by adding weighted version of new tree: $$\hat{f}(x) = \hat{f}(x) + \lambda t_b(x). $$
+    (c) Update the residuals *r*:
+        $$r_i = r_i - \lambda t_b(x_i).$$
+
+> 3. Return the final model:
+$$\hat{f}(x) = \sum_{b=1}^B \lambda t_b(x)$$
+
+***
+# Example in R
+
+For boosting, we will use the *gbm* package. Once again we will use the Ames Housing Data. 
+
+```{r,echo = TRUE,message=FALSE,warning=FALSE}
+library(gbm)
+set.seed(1)
+# Create our boosting model
+amesBoost <- gbm(Sale_Price ~ .,data = ames,train.fraction = .8, distribution = 'gaussian',n.trees = 500,interaction.depth = 3)
+```
+
+- Formula and data parameters are the same as in randomForest()
+- *train.fraction* determines the fraction of data to be used for training and the fraction to be used for validation
+- *distribution*, typically *gaussian* if outcome variable is continous and *bernoulli* for binary outcome
+- *n.trees*, number of trees to train model on
+- *interaction.depth*, maximum number of splits allowed in each tree
+
+***
+
+```{r,message=FALSE,warning=FALSE}
+err <- err %>% mutate('Boosting' = amesBoost$valid.error)
+
+gr = reshape2::melt(err,id = 'tree')
+
+ggplot(data = gr,aes(tree,value,color = variable)) + geom_line() + labs(x = "Number of Trees",y = "Mean Squared Error"
+                                                                        , title = "Mean Squared Error by Number of Trees", 
+                                                                        color = "Method")
+```
+
+
+*** 
