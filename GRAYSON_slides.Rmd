@@ -31,7 +31,7 @@ The process of creating a random forest is very similar to the process of baggin
 ***
 # Visualization
 
-![](randomForest.jpg)
+![](images/randomForest.jpg)
 
 ***
 # Algorithm
@@ -78,7 +78,7 @@ rf <- randomForest(Sales_Price ~ ., data = ames)
 # Variable Selection
 
 ```{r , echo=FALSE,fig.height= 10}
-knitr::include_graphics("crop_1.png")
+knitr::include_graphics("images/icrop_1.png")
 ```
 
 ***
@@ -110,7 +110,7 @@ library(readr)
 # errFrame = data.frame(numVars = 1:18,mseTest = test.err,mseOob = oob.err)
 # write.csv(errFrame,"error_by_split.csv")
 
-errFrame <- read_csv("error_by_split.csv") %>% select(-X1)
+errFrame <- read_csv("data/error_by_split.csv") %>% select(-X1)
 
 errFrame <- reshape2::melt(errFrame,id = 'numVars')
                            
@@ -121,12 +121,12 @@ ggplot(aes(x = numVars,y = value,color = variable),data = errFrame) + geom_line(
 # Creating the Random Forest
 
 ```{r ,echo=FALSE,fig.height= 10}
-knitr::include_graphics("crop_2.png")
+knitr::include_graphics("images/crop_2.png")
 ```
 
 ***
 ```{r, load myData, warning=FALSE, message=FALSE}
-load("myData.RData")
+load("data/myData.RData")
 
 set.seed(15)
 
