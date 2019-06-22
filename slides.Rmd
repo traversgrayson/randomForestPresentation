@@ -1,7 +1,7 @@
 ---
 title: "Random Forests and Boostng"
 author: "Travers Parsons-Grayson"
-date: "April 7, 2019"
+date: "April 10, 2019"
 output:
   beamer_presentation: 
     slide_level: 1
@@ -15,6 +15,8 @@ library(AmesHousing)
 library(dplyr)
 library(ggplot2)
 library(randomForest)
+
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:\\Users\\Travers\\AppData\\Local\\Programs\\MiKTeX 2.9\\miktex\\bin\\x64", sep=.Platform$path.sep))
 ```
 
 # Random Forests vs. Bagging (Motivation)
@@ -75,7 +77,7 @@ rf <- randomForest(Sales_Price ~ ., data = ames)
 
 # Variable Selection
 
-```{r pressure, echo=FALSE,fig.height= 10}
+```{r , echo=FALSE,fig.height= 10}
 knitr::include_graphics("crop_1.png")
 ```
 
@@ -199,12 +201,12 @@ For boosting, we will use the *gbm* package. Once again we will use the Ames Hou
 library(gbm)
 set.seed(1)
 # Create our boosting model
-amesBoost <- gbm(Sale_Price ~ .,data = ames,train.fraction = .8, distribution = 'gaussian',n.trees = 500,interaction.depth = 3)
+amesBoost <- gbm(Sale_Price ~ .,data = ames,train.fraction = .8, 
+                 distribution = 'gaussian',
+                 n.trees = 500,interaction.depth = 3)
 ```
-
-- Formula and data parameters are the same as in randomForest()
 - *train.fraction* determines the fraction of data to be used for training and the fraction to be used for validation
-- *distribution*, typically *gaussian* if outcome variable is continous and *bernoulli* for binary outcome
+- *distribution*, typically *gaussian* if outcome variable is continuous and *bernoulli* for binary outcome
 - *n.trees*, number of trees to train model on
 - *interaction.depth*, maximum number of splits allowed in each tree
 
@@ -222,3 +224,37 @@ ggplot(data = gr,aes(tree,value,color = variable)) + geom_line() + labs(x = "Num
 
 
 *** 
+
+# Random Forests vs Boosting
+
+## Random Forests
+
+### Strengths
+- low variance
+- good with high dimensional data and missing data
+- less likely to over-fit
+- easy to tune hyperparameters
+
+### Weaknesses
+- can be slow
+- can be biased (in terms of importance) towards categories with more levels
+- larger trees can lack interpretibility
+
+***
+
+## Boosting
+
+### Strengths
+- fast
+- smaller trees often are more intuitive
+- low bias
+
+### Weaknesses
+- prone to overfitting
+- harder to tune hyperparameters than for random forests
+
+# Problem Set
+
+1. MSDR Exercise 8.1 - but fit a model using both Boosting and Random Forests and compare the results visually. See my code from the presentation for reference (Pg 202-203). 
+
+2. (conceptual) ISLR Exercises 8.4 - 1 (Pg 332)

@@ -1,0 +1,66 @@
+---
+title: "Lecture Notes"
+author: "Travers Parsons-Grayson"
+date: "April 9, 2019"
+output: html_document
+---
+
+### Motivation for RF
+
+- RF are essentially the same as bagging, except that at each split we only consider *m* out of our total *p* predictors
+    - bagging is a special case of RF when *m* = *p*
+    
+- RF creates more variance in trees, in turn reduces variance of prediction
+
+### Visual
+
+- outlined in red are the steps that only have in random forests
+- both are almost the same, only differing at one step
+
+
+### Params
+
+- the most important parameters are number of trees and number of variables to consider at each split
+- sometimes restrict size of trees for interpretibility and to reduce complexity
+
+### Process
+
+- same as bagging plus additional step
+
+### Example in R
+
+- randomForest package
+- put in formula like you would for linear regression
+- only thing you might want to tune is *m*, by defauly *m* = $\sqrt{p}$ for classification problems
+and *m* = p/3 for regression
+- look at what values of *m* work best, can be time intensive - 10 was best out of ones shown in example
+
+
+### Boosting
+- create tree using residuals from last tree, unsupervised in a way (after 1st tree)
+- set our estimate to 0 for any data point, and the residuals to the outcome variable y
+- fit a tree using residuals
+- update our estimate using that tree, weighted by $\lambda$
+- now update residuals
+- after b times return final model
+
+### Example in R
+- gbm package
+- might want to tweak number of trees (can overfit), or depth
+- distrn gaussian for regression and bernoulli for classification
+- in our example boosting did really well (data in validation set)
+
+### Boosting vs RF
+
+- RF
+    - low varinace, good with missing and high dem data
+    - doesn't overfit
+    - easy to tune
+    - can be slow,not very interpretable
+    
+- Boosting
+    - faster
+    - more intuitive
+    - lower bias, higher variance
+    - can overfit
+    - harder to tune

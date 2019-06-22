@@ -1,0 +1,31 @@
+---
+title: "Presentation Outline"
+author: "Travers Parsons-Grayson"
+date: "April 10, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+- Motivation for Random Forests
+    - Decorrelate trees (visualization)
+
+- RF Algorithm 
+    - Parameters
+    - construction
+
+- Example in R of random forest
+
+- Motivation for Boosting
+
+- Algorithm
+    - Parameters
+    - construction
+
+- Example in R of boosting
+
+- Boosting vs Random Forests
+
